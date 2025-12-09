@@ -11,5 +11,5 @@ import com.skillstorm.inventory_management.Model.Warehouse;
 public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> findByWarehouse(Warehouse warehouse);
     List<Item> findByNameContainingIgnoreCase(String name);
-    List<Item> findBySKUContainingIgnoreCase(String sku);
+    List<Item> findBySkuContainingIgnoreCase(String sku);
 }
