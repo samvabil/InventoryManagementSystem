@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.skillstorm.inventory_management.DTO.ItemPatchRequest;
 import com.skillstorm.inventory_management.Model.Item;
 import com.skillstorm.inventory_management.Model.Warehouse;
 import com.skillstorm.inventory_management.Repository.ItemRepository;
@@ -101,6 +102,66 @@ public class ItemService {
         existing.setQuantity(updatedItem.getQuantity());
         existing.setStorageLocation(updatedItem.getStorageLocation());
         existing.setWarehouse(targetWarehouse);
+
+        return itemRepository.save(existing);
+    }
+
+    
+    @Transactional
+    public Item patchItem(int itemId, ItemPatchRequest patch) {
+        Item existing = findItemById(itemId);
+        if (existing == null) {
+            throw new IllegalArgumentException("Item with id " + itemId + " not found");
+        }
+
+        String newName = existing.getName();
+        if (patch.getName() != null) {
+            String trimmed = patch.getName().trim();
+            if (trimmed.isEmpty()) {
+                throw new IllegalArgumentException("Item name cannot be blank");
+            }
+            newName = trimmed;
+        }
+
+        String newSku = existing.getSku();
+        if (patch.getSku() != null) {
+            String trimmed = patch.getSku().trim();
+            if (trimmed.isEmpty()) {
+                throw new IllegalArgumentException("Item SKU cannot be blank");
+            }
+            newSku = trimmed;
+        }
+
+        int newQuantity = existing.getQuantity();
+        if (patch.getQuantity() != null) {
+            if (patch.getQuantity() < 0) {
+                throw new IllegalArgumentException("Item quantity cannot be negative");
+            }
+            newQuantity = patch.getQuantity();
+        }
+
+        String newStorageLocation = existing.getStorageLocation();
+        if (patch.getStorageLocation() != null) {
+            newStorageLocation = patch.getStorageLocation();
+        }
+
+        Warehouse warehouse = existing.getWarehouse();
+        if (warehouse != null && newQuantity != existing.getQuantity()) {
+            int warehouseId = warehouse.getId();
+
+            int currentLoad = warehouseService.getCurrentWarehouseLoad(warehouseId);
+            int loadWithoutThisItem = currentLoad - existing.getQuantity();
+            int projectedLoad = loadWithoutThisItem + newQuantity;
+
+            if (projectedLoad > warehouse.getMax_capacity()) {
+                throw new IllegalStateException("Updating item would exceed warehouse capacity");
+            }
+        }
+
+        existing.setName(newName);
+        existing.setSku(newSku);
+        existing.setQuantity(newQuantity);
+        existing.setStorageLocation(newStorageLocation);
 
         return itemRepository.save(existing);
     }
