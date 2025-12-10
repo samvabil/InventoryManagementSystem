@@ -210,7 +210,7 @@ public class ItemService {
         itemRepository.save(item);
 
         List<Item> destinationItemsWithSameSku =
-                itemRepository.findBySkuContainingIgnoreCase(item.getSku());
+        itemRepository.findBySkuIgnoreCase(item.getSku());
 
         Item destinationItem = destinationItemsWithSameSku.stream()
                 .filter(i -> i.getWarehouse() != null && i.getWarehouse().getId() == toWarehouseId)
@@ -242,5 +242,12 @@ public class ItemService {
         if (item.getQuantity() < 0) {
             throw new IllegalArgumentException("Item quantity cannot be negative");
         }
+    }
+
+    public int getTotalQuantityBySku(String sku) {
+    if (sku == null || sku.trim().isEmpty()) {
+        throw new IllegalArgumentException("SKU is required");
+    }
+    return itemRepository.getTotalQuantityBySku(sku.trim());
     }
 }

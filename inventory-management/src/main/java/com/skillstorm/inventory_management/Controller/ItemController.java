@@ -105,4 +105,10 @@ public class ItemController {
         itemService.transferItem(itemId, fromWarehouse, toWarehouse, quantity);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/sku/{sku}/total")
+    public ResponseEntity<Integer> getTotalQuantityBySku(@PathVariable String sku) {
+        int total = itemService.getTotalQuantityBySku(sku);
+        return new ResponseEntity<>(total, HttpStatus.OK);
+    }
 }
