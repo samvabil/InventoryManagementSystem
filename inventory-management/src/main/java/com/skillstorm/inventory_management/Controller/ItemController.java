@@ -22,7 +22,7 @@ import com.skillstorm.inventory_management.Service.ItemService;
 
 @RestController
 @RequestMapping("/items")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*") // for development
 public class ItemController {
 
     private final ItemService itemService;

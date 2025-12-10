@@ -26,3 +26,4 @@ inventory-management/.gitattributes
 .gitignore
 inventory-management/mvnw
 .gitignore
+.vscode/settings.json

@@ -19,7 +19,7 @@ import com.skillstorm.inventory_management.Service.WarehouseService;
 
 @RestController
 @RequestMapping("/warehouses")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*") // for development
 public class WarehouseController {
 
     private final WarehouseService warehouseService;

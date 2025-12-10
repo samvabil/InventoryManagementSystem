@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory Management Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="top-bar">
+        <h1>Inventory Management</h1>
+        <button id="add-warehouse-btn" class="btn primary">Add Warehouse</button>
+    </header>
+
+    <main class="layout">
+        <section class="warehouses-section">
+            <h2>Warehouses</h2>
+            <div id="warehouse-cards" class="warehouse-grid">
+            </div>
+        </section>
+    </main>
+
+    <div id="warehouse-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="warehouse-modal-title">Add Warehouse</h3>
+            <form id="warehouse-form">
+                <input type="hidden" id="warehouse-id">
+
+                <label>
+                    Name
+                    <input type="text" id="warehouse-name" required>
+                </label>
+
+                <label>
+                    Location
+                    <input type="text" id="warehouse-location" required>
+                </label>
+
+                <label>
+                    Max Capacity
+                    <input type="number" id="warehouse-max-capacity" min="0" required>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn primary">Save</button>
+                    <button type="button" id="warehouse-cancel-btn" class="btn secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="items-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="items-modal-title">Items</h3>
+
+            <div id="items-list">
+            </div>
+
+            <hr>
+
+            <h4>Add or Edit Item</h4>
+            <form id="item-form">
+                <input type="hidden" id="item-id">
+                <input type="hidden" id="item-warehouse-id">
+
+                <label>
+                    Name
+                    <input type="text" id="item-name" required>
+                </label>
+
+                <label>
+                    SKU
+                    <input type="text" id="item-sku" required>
+                </label>
+
+                <label>
+                    Quantity
+                    <input type="number" id="item-quantity" min="0" required>
+                </label>
+
+                <label>
+                    Storage Location
+                    <input type="text" id="item-storage-location" required>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn primary">Save Item</button>
+                    <button type="button" id="item-cancel-btn" class="btn secondary">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay hidden"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
