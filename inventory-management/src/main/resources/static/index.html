@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Inventory Management Dashboard</title>
+    <title>S E B Inventory Management</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="IMG/s-logo.png">
 </head>
 <body>
     <header class="top-bar">
-        <h1>Inventory Management</h1>
+        <div class="brand">
+            <img src="IMG/seb-logo.png" alt="S E B logo" class="brand-logo">
+            <h1>Inventory Management</h1>
+        </div>
         <button id="add-warehouse-btn" class="btn primary">Add Warehouse</button>
     </header>
 
@@ -55,9 +59,16 @@
             <div id="items-list">
             </div>
 
-            <hr>
+            <div class="modal-actions">
+                <button type="button" id="items-add-btn" class="btn primary">Add Item</button>
+                <button type="button" id="items-close-btn" class="btn secondary">Close</button>
+            </div>
+        </div>
+    </div>
 
-            <h4>Add or Edit Item</h4>
+    <div id="item-form-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="item-form-modal-title">Add Item</h3>
             <form id="item-form">
                 <input type="hidden" id="item-id">
                 <input type="hidden" id="item-warehouse-id">

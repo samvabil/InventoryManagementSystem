@@ -15,6 +15,11 @@ const warehouseCancelBtn = document.getElementById("warehouse-cancel-btn");
 const itemsModal = document.getElementById("items-modal");
 const itemsModalTitle = document.getElementById("items-modal-title");
 const itemsListContainer = document.getElementById("items-list");
+const itemsAddBtn = document.getElementById("items-add-btn");
+const itemsCloseBtn = document.getElementById("items-close-btn");
+
+const itemFormModal = document.getElementById("item-form-modal");
+const itemFormModalTitle = document.getElementById("item-form-modal-title");
 const itemForm = document.getElementById("item-form");
 const itemIdInput = document.getElementById("item-id");
 const itemWarehouseIdInput = document.getElementById("item-warehouse-id");
@@ -25,6 +30,8 @@ const itemStorageLocationInput = document.getElementById("item-storage-location"
 const itemCancelBtn = document.getElementById("item-cancel-btn");
 
 const overlay = document.getElementById("overlay");
+
+let currentWarehouseForItems = null;
 
 function openModal(modal) {
     modal.classList.remove("hidden");
@@ -99,6 +106,7 @@ async function loadWarehouses() {
 async function createWarehouseCard(warehouse) {
     const card = document.createElement("div");
     card.className = "card";
+    card.dataset.warehouseId = warehouse.id;
 
     let currentLoad = 0;
     let remainingCapacity = 0;
@@ -117,20 +125,26 @@ async function createWarehouseCard(warehouse) {
     const header = document.createElement("div");
     header.className = "card-header";
 
+    const headerMain = document.createElement("div");
+    headerMain.className = "card-header-main";
+
     const title = document.createElement("h3");
     title.textContent = warehouse.name;
-
-    const capacityBadge = document.createElement("span");
-    capacityBadge.style.fontSize = "0.8rem";
-    capacityBadge.style.color = "#6b7280";
-    capacityBadge.textContent = `ID: ${warehouse.id}`;
-
-    header.appendChild(title);
-    header.appendChild(capacityBadge);
 
     const subtitle = document.createElement("div");
     subtitle.className = "card-subtitle";
     subtitle.textContent = warehouse.location;
+
+    headerMain.appendChild(title);
+    headerMain.appendChild(subtitle);
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn secondary";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => openWarehouseModal(warehouse));
+
+    header.appendChild(headerMain);
+    header.appendChild(editBtn);
 
     const metrics = document.createElement("div");
     metrics.className = "card-metrics";
@@ -151,15 +165,10 @@ async function createWarehouseCard(warehouse) {
     const addItemBtn = document.createElement("button");
     addItemBtn.className = "btn secondary";
     addItemBtn.textContent = "Add item";
-    addItemBtn.addEventListener("click", () => openItemsModal(warehouse, true));
-
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn secondary";
-    editBtn.textContent = "Edit";
-    editBtn.addEventListener("click", () => openWarehouseModal(warehouse));
+    addItemBtn.addEventListener("click", () => openItemFormModal(warehouse));
 
     const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn danger";
+    deleteBtn.className = "btn primary";
     deleteBtn.textContent = "Delete";
     deleteBtn.addEventListener("click", async () => {
         const confirmed = window.confirm(`Delete warehouse "${warehouse.name}"? This may fail if it still has items.`);
@@ -176,11 +185,9 @@ async function createWarehouseCard(warehouse) {
 
     actions.appendChild(viewItemsBtn);
     actions.appendChild(addItemBtn);
-    actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
     card.appendChild(header);
-    card.appendChild(subtitle);
     card.appendChild(metrics);
     card.appendChild(actions);
 
@@ -236,24 +243,18 @@ warehouseForm.addEventListener("submit", async (e) => {
 });
 
 warehouseCancelBtn.addEventListener("click", () => closeModal(warehouseModal));
+
 overlay.addEventListener("click", () => {
     closeModal(warehouseModal);
     closeModal(itemsModal);
+    closeModal(itemFormModal);
 });
 
-async function openItemsModal(warehouse, startWithAddForm = false) {
+async function openItemsModal(warehouse) {
+    currentWarehouseForItems = warehouse;
     itemsModalTitle.textContent = `Items in ${warehouse.name}`;
-    itemWarehouseIdInput.value = warehouse.id;
-    itemIdInput.value = "";
-    if (!startWithAddForm) {
-        itemNameInput.value = "";
-        itemSkuInput.value = "";
-        itemQuantityInput.value = "";
-        itemStorageLocationInput.value = "";
-    }
-
+    itemWarehouseIdInput.value = warehouse.id; 
     await loadItemsForWarehouse(warehouse.id);
-
     openModal(itemsModal);
 }
 
@@ -292,7 +293,7 @@ async function loadItemsForWarehouse(warehouseId) {
             const editBtn = document.createElement("button");
             editBtn.className = "btn secondary";
             editBtn.textContent = "Edit";
-            editBtn.addEventListener("click", () => fillItemFormForEdit(item));
+            editBtn.addEventListener("click", () => openItemFormModal(currentWarehouseForItems, item));
 
             const deleteBtn = document.createElement("button");
             deleteBtn.className = "btn danger";
@@ -324,13 +325,28 @@ async function loadItemsForWarehouse(warehouseId) {
     }
 }
 
-function fillItemFormForEdit(item) {
-    itemIdInput.value = item.id;
-    itemWarehouseIdInput.value = item.warehouse.id;
-    itemNameInput.value = item.name;
-    itemSkuInput.value = item.sku;
-    itemQuantityInput.value = item.quantity;
-    itemStorageLocationInput.value = item.storageLocation;
+function openItemFormModal(warehouse, item = null) {
+    currentWarehouseForItems = warehouse;
+    itemWarehouseIdInput.value = warehouse.id;
+
+    if (item) {
+        itemFormModalTitle.textContent = `Edit item in ${warehouse.name}`;
+        itemIdInput.value = item.id;
+        itemNameInput.value = item.name;
+        itemSkuInput.value = item.sku;
+        itemQuantityInput.value = item.quantity;
+        itemStorageLocationInput.value = item.storageLocation;
+    } else {
+        itemFormModalTitle.textContent = `Add item to ${warehouse.name}`;
+        itemIdInput.value = "";
+        itemNameInput.value = "";
+        itemSkuInput.value = "";
+        itemQuantityInput.value = "";
+        itemStorageLocationInput.value = "";
+    }
+
+    itemsModal.classList.contains("hidden") || itemsModal.classList.add("hidden");
+    openModal(itemFormModal);
 }
 
 itemForm.addEventListener("submit", async (e) => {
@@ -365,14 +381,25 @@ itemForm.addEventListener("submit", async (e) => {
         }
 
         itemIdInput.value = "";
-        await loadItemsForWarehouse(warehouseId);
+        closeModal(itemFormModal);
+
+        if (currentWarehouseForItems) {
+            await openItemsModal(currentWarehouseForItems);
+        }
     } catch (err) {
         console.error(err);
         alert("Failed to save item. Check capacity and validation rules.");
     }
 });
 
-itemCancelBtn.addEventListener("click", () => closeModal(itemsModal));
+itemCancelBtn.addEventListener("click", () => closeModal(itemFormModal));
+
+itemsAddBtn.addEventListener("click", () => {
+    if (!currentWarehouseForItems) return;
+    openItemFormModal(currentWarehouseForItems);
+});
+
+itemsCloseBtn.addEventListener("click", () => closeModal(itemsModal));
 
 addWarehouseBtn.addEventListener("click", () => openWarehouseModal(null));
 
