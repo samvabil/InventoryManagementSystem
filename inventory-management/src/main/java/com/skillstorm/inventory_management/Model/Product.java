@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,8 +37,9 @@ public class Product {
     @Column
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String category;
+    private Department category;
 
     @JsonIgnore
     @OneToMany(mappedBy = "product")
@@ -45,14 +48,14 @@ public class Product {
     public Product() {
     }
 
-    public Product(String sku, String name, String description, String category) {
+    public Product(String sku, String name, String description, Department category) {
         this.sku = sku;
         this.name = name;
         this.description = description;
         this.category = category;
     }
 
-    public Product(int id, String sku, String name, String description, String category) {
+    public Product(int id, String sku, String name, String description, Department category) {
         this.id = id;
         this.sku = sku;
         this.name = name;
@@ -92,11 +95,11 @@ public class Product {
         this.description = description;
     }
 
-    public String getCategory() {
+    public Department getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Department category) {
         this.category = category;
     }
 
