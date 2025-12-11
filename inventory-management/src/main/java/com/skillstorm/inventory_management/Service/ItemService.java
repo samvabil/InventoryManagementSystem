@@ -24,15 +24,29 @@ public class ItemService {
         this.warehouseService = warehouseService;
     }
 
+    /**
+     * Retrieves all items 
+     * @return list of all items
+     */
     public List<Item> findAllItems() {
         return itemRepository.findAll();
     }
 
+    /**
+     * Looks up a single item by its ID
+     * @param id item ID
+     * @return the matching Item, or null if not found
+     */
     public Item findItemById(int id) {
         Optional<Item> item = itemRepository.findById(id);
         return item.orElse(null);
     }
 
+    /**
+     * Retrieves all items stored in a specific warehouse 
+     * @param warehouseId warehouse ID
+     * @return list of items in the warehouse or an empty list if the warehouse does not exist
+     */
     public List<Item> findItemsByWarehouseId(int warehouseId) {
         Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
         if (warehouse == null) {
@@ -41,14 +55,43 @@ public class ItemService {
         return itemRepository.findByWarehouse(warehouse);
     }
 
+    /**
+     * Searches for items whose name contains the provided fragment, not case sensitive
+     * @param nameFragment text fragment to search for
+     * @return matching items
+     */
     public List<Item> searchItemsByName(String nameFragment) {
         return itemRepository.findByNameContainingIgnoreCase(nameFragment);
     }
 
+    /**
+     * Searches for items whose SKU contains the provided fragment, not case sensitive
+     * @param skuFragment text fragment to search for within the SKU
+     * @return matching items
+     */
     public List<Item> searchItemsBySku(String skuFragment) {
         return itemRepository.findBySkuContainingIgnoreCase(skuFragment);
     }
 
+    /**
+     * Creates a new item and assigns it to a specific warehouse
+     *
+     * Validation rules:
+     * <ul>
+     *     <li>Name is required and cannot be blank</li>
+     *     <li>SKU is required and cannot be blank</li>
+     *     <li>Quantity must be zero or positive</li>
+     *     <li>Warehouse must have enough remaining capacity</li>
+     * </ul>
+     *
+     * @param warehouseId target warehouse ID
+     * @param item item data to create
+     * @return the saved item
+     *
+     * @throws IllegalArgumentException if the warehouse is not found or
+     *                                  basic item fields are invalid
+     * @throws IllegalStateException if the warehouse lacks capacity
+     */
     @Transactional
     public Item addItemToWarehouse(int warehouseId, Item item) {
         Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
@@ -67,6 +110,25 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
+    /**
+     * Performs a full update of an existing item
+     *
+     * This method:
+     * <ul>
+     *     <li>Validates the new item fields</li>
+     *     <li>Optionally moves the item to a different warehouse</li>
+     *     <li>Ensures the target warehouse capacity is not exceeded
+     *         after the change</li>
+     * </ul>
+     *
+     * @param itemId ID of the item to update
+     * @param updatedItem new item data
+     * @return the updated item
+     *
+     * @throws IllegalArgumentException if the item or target warehouse
+     *                                  does not exist or data is invalid
+     * @throws IllegalStateException if the update would exceed warehouse capacity
+     */
     @Transactional
     public Item updateItem(int itemId, Item updatedItem) {
         Item existing = findItemById(itemId);
@@ -106,7 +168,22 @@ public class ItemService {
         return itemRepository.save(existing);
     }
 
-    
+    /**
+     * Applies a partial update to an item using a patch request
+     *
+     * Only non null fields in the patch request are applied to the
+     * existing item. Capacity constraints are checked when quantity
+     * changes.
+     *
+     * @param itemId ID of the item to update
+     * @param patch patch object containing optional new values
+     * @return the updated item
+     *
+     * @throws IllegalArgumentException if the item is not found or
+     *                                  validation fails
+     * @throws IllegalStateException if the updated quantity would exceed
+     *                               warehouse capacity
+     */
     @Transactional
     public Item patchItem(int itemId, ItemPatchRequest patch) {
         Item existing = findItemById(itemId);
@@ -166,14 +243,47 @@ public class ItemService {
         return itemRepository.save(existing);
     }
 
+    /**
+     * Deletes an item by ID, if it exists
+     *
+     * If the item is not found, no exception is thrown and the method
+     * simply returns
+     *
+     * @param itemId ID of the item to delete
+     */
     @Transactional
     public void deleteItemById(int itemId) {
         if (!itemRepository.existsById(itemId)) {
-            return; 
+            return;
         }
         itemRepository.deleteById(itemId);
     }
 
+    /**
+     * Transfers a quantity of an item from one warehouse to another
+     *
+     * The method:
+     * <ul>
+     *     <li>Validates that the item exists</li>
+     *     <li>Checks that the item is stored in the source warehouse</li>
+     *     <li>Ensures the source has enough quantity</li>
+     *     <li>Checks capacity of the destination warehouse</li>
+     *     <li>Reduces quantity in the source warehouse</li>
+     *     <li>Either updates an existing destination item with the same SKU
+     *         or creates a new one</li>
+     * </ul>
+     *
+     * @param itemId ID of the item to transfer
+     * @param fromWarehouseId source warehouse ID
+     * @param toWarehouseId destination warehouse ID
+     * @param quantity quantity to transfer (must be positive)
+     *
+     * @throws IllegalArgumentException if the item or warehouses are not
+     *                                  found or quantity is not positive
+     * @throws IllegalStateException if the item is not stored in the source
+     *                               warehouse, there is insufficient quantity,
+     *                               or the destination lacks capacity
+     */
     @Transactional
     public void transferItem(int itemId, int fromWarehouseId, int toWarehouseId, int quantity) {
         if (quantity <= 0) {
@@ -210,7 +320,7 @@ public class ItemService {
         itemRepository.save(item);
 
         List<Item> destinationItemsWithSameSku =
-        itemRepository.findBySkuIgnoreCase(item.getSku());
+                itemRepository.findBySkuIgnoreCase(item.getSku());
 
         Item destinationItem = destinationItemsWithSameSku.stream()
                 .filter(i -> i.getWarehouse() != null && i.getWarehouse().getId() == toWarehouseId)
@@ -232,6 +342,13 @@ public class ItemService {
         }
     }
 
+    /**
+     * Validates core item fields such as name, SKU and quantity
+     *
+     * @param item item to validate
+     *
+     * @throws IllegalArgumentException if any required field is missing or invalid
+     */
     private void validateItemBasicFields(Item item) {
         if (item.getName() == null || item.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Item name is required");
@@ -244,10 +361,18 @@ public class ItemService {
         }
     }
 
+    /**
+     * Returns the total quantity of a given SKU across all warehouses
+     *
+     * @param sku SKU string (required, cannot be blank)
+     * @return total quantity for that SKU, or zero if none exist
+     *
+     * @throws IllegalArgumentException if the SKU is null or blank
+     */
     public int getTotalQuantityBySku(String sku) {
-    if (sku == null || sku.trim().isEmpty()) {
-        throw new IllegalArgumentException("SKU is required");
-    }
-    return itemRepository.getTotalQuantityBySku(sku.trim());
+        if (sku == null || sku.trim().isEmpty()) {
+            throw new IllegalArgumentException("SKU is required");
+        }
+        return itemRepository.getTotalQuantityBySku(sku.trim());
     }
 }
