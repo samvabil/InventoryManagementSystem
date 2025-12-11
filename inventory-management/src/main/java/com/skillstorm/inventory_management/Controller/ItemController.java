@@ -31,12 +31,21 @@ public class ItemController {
         this.itemService = itemService;
     }
 
+    /**
+     * Retrieves all items 
+     * @return list of items with HTTP 200
+     */
     @GetMapping
     public ResponseEntity<List<Item>> findAllItems() {
         List<Item> items = itemService.findAllItems();
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves an item by its ID
+     * @param id item ID
+     * @return item with HTTP 200 or HTTP 404 if not found
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Item> findItemById(@PathVariable int id) {
         Item item = itemService.findItemById(id);
@@ -46,22 +55,43 @@ public class ItemController {
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all items within a warehouse
+     * @param warehouseId warehouse ID 
+     * @return list of items in warehouse with HTTP 200
+     */
     @GetMapping("/warehouse/{warehouseId}")
     public ResponseEntity<List<Item>> findItemsByWarehouse(@PathVariable int warehouseId) {
         List<Item> items = itemService.findItemsByWarehouseId(warehouseId);
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
+    /**
+     * Searches items by name, not case sensitive
+     * @param q text query for partial name matching
+     * @return matching items with HTTP 200
+     */
     @GetMapping("/search/name")
     public ResponseEntity<List<Item>> searchByName(@RequestParam String q) {
         return new ResponseEntity<>(itemService.searchItemsByName(q), HttpStatus.OK);
     }
 
+    /**
+     * Searches items by SKU, not case sensitive
+     * @param q SKU query
+     * @return matching items with HTTP 200
+     */
     @GetMapping("/search/sku")
     public ResponseEntity<List<Item>> searchBySku(@RequestParam String q) {
         return new ResponseEntity<>(itemService.searchItemsBySku(q), HttpStatus.OK);
     }
 
+    /**
+     * Creates a new item in specified warehouse
+     * @param warehouseId warehouse ID, which warehouse to assign item to
+     * @param item request body with item fields
+     * @return created item with HTTP 201
+     */
     @PostMapping("/warehouse/{warehouseId}")
     public ResponseEntity<Item> createItem(
             @PathVariable int warehouseId,
@@ -71,6 +101,12 @@ public class ItemController {
         return new ResponseEntity<>(newItem, HttpStatus.CREATED);
     }
 
+    /**
+     * Fully updates an existing item by ID
+     * @param id item ID
+     * @param item request body with updated fields 
+     * @return updated item with HTTP 200
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Item> updateItem(
             @PathVariable int id,
@@ -80,6 +116,12 @@ public class ItemController {
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
+    /**
+     * Partially updates an item with only fields provided in request body
+     * @param id item ID of item to be updated
+     * @param patchRequest object containing optional fields to update
+     * @return updated item with HTTP 200
+     */
     @PatchMapping("/{id}")
     public ResponseEntity<Item> patchItem(
             @PathVariable int id,
@@ -89,12 +131,25 @@ public class ItemController {
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
+    /**
+     * Deletes an item by its ID
+     * @param id item ID
+     * @return HTTP 204 after successful deletion
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(@PathVariable int id) {
         itemService.deleteItemById(id);
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Transfer quantity of item from one warehouse to another
+     * @param itemId item ID
+     * @param fromWarehouse souce warehouse ID
+     * @param toWarehouse destination warehouse ID
+     * @param quantity number of units to be transferred
+     * @return HTTP 200 on success 
+     */
     @PostMapping("/{itemId}/transfer")
     public ResponseEntity<Void> transferItem(
             @PathVariable int itemId,
@@ -106,6 +161,11 @@ public class ItemController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Retrieve total quantity of specific SKU across all warehouses
+     * @param sku SKU string 
+     * @return number of items with specified SKU in all warehouses with HTTP 200
+     */
     @GetMapping("/sku/{sku}/total")
     public ResponseEntity<Integer> getTotalQuantityBySku(@PathVariable String sku) {
         int total = itemService.getTotalQuantityBySku(sku);
