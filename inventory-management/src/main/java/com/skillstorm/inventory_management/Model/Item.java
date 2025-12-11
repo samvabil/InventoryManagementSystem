@@ -1,3 +1,8 @@
+/**
+ * Represents an individual inventory item stored inside a warehouse
+ * Includes item name, SKU, quantity, and storage location, which represents the grocery department
+ * Mapped to the ITEMS table in the database
+ */
 package com.skillstorm.inventory_management.Model;
 
 import jakarta.persistence.Column;

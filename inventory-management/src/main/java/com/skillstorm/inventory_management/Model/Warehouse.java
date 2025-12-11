@@ -1,3 +1,8 @@
+/**
+ * Represents a warehouse facility that stores inventory items
+ * Includes name, location, maximum storage capacity
+ * Mapped to the WAREHOUSES table in the database
+ */
 package com.skillstorm.inventory_management.Model;
 
 import java.util.Set;
