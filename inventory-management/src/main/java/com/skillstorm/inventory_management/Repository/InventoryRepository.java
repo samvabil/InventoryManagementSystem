@@ -13,11 +13,23 @@ import com.skillstorm.inventory_management.Model.Product;
 import com.skillstorm.inventory_management.Model.Warehouse;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
+
     List<Inventory> findByWarehouse(Warehouse warehouse);
 
-    Optional<Inventory> findByWarehouseAndProductAndStorageLocation(
+    Optional<Inventory> findByWarehouseAndProduct(Warehouse warehouse, Product product);
+
+    List<Inventory> findByWarehouseAndProduct_NameContainingIgnoreCase(
             Warehouse warehouse,
-            Product product,
-            String storageLocation
+            String nameFragment
+    );
+
+    List<Inventory> findByWarehouseAndProduct_SkuContainingIgnoreCase(
+            Warehouse warehouse,
+            String skuFragment
+    );
+
+    List<Inventory> findByWarehouseAndProduct_CategoryContainingIgnoreCase(
+            Warehouse warehouse,
+            String categoryFragment
     );
 }

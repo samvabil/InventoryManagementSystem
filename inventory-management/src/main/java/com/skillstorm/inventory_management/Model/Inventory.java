@@ -20,7 +20,7 @@ import jakarta.persistence.UniqueConstraint;
 @Table(
     name = "INVENTORY",
     uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "warehouse_id", "product_id", "storage_location" })
+        @UniqueConstraint(columnNames = { "warehouse_id", "product_id" })
     }
 )
 public class Inventory {
