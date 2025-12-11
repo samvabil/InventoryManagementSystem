@@ -305,6 +305,7 @@ async function loadItemsForWarehouse(warehouseId) {
                 try {
                     await apiDelete(`/items/${item.id}`);
                     await loadItemsForWarehouse(warehouseId);
+                    await loadWarehouses(); 
                 } catch (err) {
                     console.error(err);
                     alert("Failed to delete item");
@@ -381,11 +382,10 @@ itemForm.addEventListener("submit", async (e) => {
         }
 
         itemIdInput.value = "";
-        closeModal(itemFormModal);
 
-        if (currentWarehouseForItems) {
-            await openItemsModal(currentWarehouseForItems);
-        }
+        await loadItemsForWarehouse(warehouseId);
+        await loadWarehouses();
+
     } catch (err) {
         console.error(err);
         alert("Failed to save item. Check capacity and validation rules.");
