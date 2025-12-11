@@ -90,8 +90,30 @@
 
                 <label>
                     Storage Location
-                    <input type="text" id="item-storage-location" required>
+                    <input
+                        type="text"
+                        id="item-storage-location"
+                        list="storage-locations"
+                        required
+                        placeholder="Select or type a department"
+                    >
                 </label>
+
+                <datalist id="storage-locations">
+                    <option value="Fruit &amp; vegetables">
+                    <option value="Meat &amp; seafood">
+                    <option value="Bakery &amp; bread">
+                    <option value="Dairy &amp; eggs">
+                    <option value="Deli &amp; prepared food">
+                    <option value="Pantry">
+                    <option value="Frozen food">
+                    <option value="Beverages">
+                    <option value="Everyday essentials">
+                    <option value="Health &amp; beauty">
+                    <option value="Baby &amp; kids">
+                    <option value="Home &amp; outdoor">
+                    <option value="Pets">
+                </datalist>
 
                 <div class="modal-actions">
                     <button type="submit" class="btn primary">Save Item</button>
