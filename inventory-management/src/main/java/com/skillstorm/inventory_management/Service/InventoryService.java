@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.skillstorm.inventory_management.Model.Department;
 import com.skillstorm.inventory_management.Model.Inventory;
 import com.skillstorm.inventory_management.Model.Product;
 import com.skillstorm.inventory_management.Model.Warehouse;
@@ -27,10 +28,20 @@ public class InventoryService {
         this.productService = productService;
     }
 
+    /**
+     * Find row in inventory by id 
+     * @param id inventory row id
+     * @return the inventory if found or null if does not exist
+     */
     public Inventory findById(int id) {
         return inventoryRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Retrieve all inventory rows in warehouse
+     * @param warehouseId warehouse id
+     * @return list of Inventory entries for that warehouse or an empty list if the warehouse is not found
+     */
     public List<Inventory> findInventoryByWarehouseId(int warehouseId) {
         Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
         if (warehouse == null) {
@@ -39,6 +50,12 @@ public class InventoryService {
         return inventoryRepository.findByWarehouse(warehouse);
     }
 
+    /**
+     * "Search" inventory in warehouse by product name 
+     * @param warehouseId  warehouse id
+     * @param nameFragment user search
+     * @return matching entries or empty list if warehouse not found 
+     */
     public List<Inventory> searchByProductNameInWarehouse(int warehouseId, String nameFragment) {
         Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
         if (warehouse == null) {
@@ -53,6 +70,12 @@ public class InventoryService {
         );
     }
 
+    /**
+     * "Search" inventory in warehouse by SKU
+     * @param warehouseId warehouse id
+     * @param skuFragment user search
+     * @return matching entries or empty list if warehouse not found
+     */
     public List<Inventory> searchBySkuInWarehouse(int warehouseId, String skuFragment) {
         Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
         if (warehouse == null) {
@@ -67,26 +90,28 @@ public class InventoryService {
         );
     }
 
-    public List<Inventory> searchByCategoryInWarehouse(int warehouseId, String categoryFragment) {
-        Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
-        if (warehouse == null) {
-            return Collections.emptyList();
-        }
-        if (categoryFragment == null || categoryFragment.trim().isEmpty()) {
-            return inventoryRepository.findByWarehouse(warehouse);
-        }
-        return inventoryRepository.findByWarehouseAndProduct_CategoryContainingIgnoreCase(
-                warehouse,
-                categoryFragment.trim()
-        );
-    }
-
+    /**
+     * Add inventory to warehouse for given product
+     * Create if it does not already exist 
+     * Rules: warehouse has to exist, quantity can't be less than 0, warehouse must have remaining capacity for new quantity, 
+     * if inventory row in this warehouse exists for product, quantity increased 
+     * @param warehouseId     warehouse id 
+     * @param sku             product SKU
+     * @param name            product name 
+     * @param description     product description
+     * @param category        product category/department 
+     * @param quantity        quantity to add 
+     * @param storageLocation where located within warehouse 
+     * @return the created or updated Inventory entity
+     * @throws IllegalArgumentException if the warehouse does not exist or quantity is negative
+     * @throws IllegalStateException    if the warehouse does not have enough capacity
+     */
     @Transactional
     public Inventory addInventoryToWarehouse(int warehouseId,
                                              String sku,
                                              String name,
                                              String description,
-                                             String category,
+                                             Department category,
                                              int quantity,
                                              String storageLocation) {
         Warehouse warehouse = warehouseService.findWarehouseById(warehouseId);
@@ -130,6 +155,15 @@ public class InventoryService {
         return inventoryRepository.save(inventory);
     }
 
+    /**
+     * Update quantity and storage location for existing inventory row
+     * @param inventoryId        inventory row id 
+     * @param newQuantity        new quantity 
+     * @param newStorageLocation new storage location
+     * @return the updated Inventory entity
+     * @throws IllegalArgumentException if the inventory row is not found or quantity is negative
+     * @throws IllegalStateException    if the update would exceed warehouse capacity
+     */
     @Transactional
     public Inventory updateInventory(int inventoryId,
                                      int newQuantity,
@@ -161,6 +195,10 @@ public class InventoryService {
         return inventoryRepository.save(existing);
     }
 
+    /**
+     * Delete inventory row if it exists
+     * @param inventoryId inventory row id 
+     */
     @Transactional
     public void deleteInventoryById(int inventoryId) {
         if (!inventoryRepository.existsById(inventoryId)) {
@@ -169,6 +207,21 @@ public class InventoryService {
         inventoryRepository.deleteById(inventoryId);
     }
 
+    /**
+     * Transfer quantity of product from one warehouse to another 
+     * Rules: transfer quantity positive, source inventory exists and belongs to source warehouse,
+     * source inventory row has enough quantity to transfer, destination warehouse exists and has capacity,
+     * if inventory row exists in destination warehouse, quantity increased 
+     * @param sourceInventoryId id of the inventory row in the source warehouse
+     * @param fromWarehouseId   id of the source warehouse
+     * @param toWarehouseId     id of the destination warehouse
+     * @param quantityToTransfer quantity to transfer 
+     * @throws IllegalArgumentException if warehouses or inventory row are not found,
+     *                                  or transfer quantity is not positive
+     * @throws IllegalStateException    if the inventory is not in the source warehouse,
+     *                                  there is insufficient quantity, or the destination
+     *                                  warehouse does not have enough capacity
+     */
     @Transactional
     public void transferInventory(int sourceInventoryId,
                                   int fromWarehouseId,
