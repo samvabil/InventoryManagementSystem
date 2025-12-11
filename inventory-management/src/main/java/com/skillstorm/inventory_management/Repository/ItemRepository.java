@@ -1,3 +1,9 @@
+/**
+ * Extends JpaRepository, which provides CRUD operations and pagination
+ * Custom queries for searching items by warehouse, 
+ * partial matching based on name and SKU for searching, not case sensitive,
+ * aggregating total quantity for a specific SKU 
+ */
 package com.skillstorm.inventory_management.Repository;
 
 import java.util.List;

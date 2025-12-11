@@ -1,3 +1,6 @@
+/**
+ * Extends JpaRepository, which provides CRUD operations and pagination
+ */
 package com.skillstorm.inventory_management.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
