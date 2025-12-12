@@ -245,3 +245,32 @@ body {
 .hidden {
     display: none;
 }
+
+.search-input {
+    width: 100%;
+    max-width: 420px;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    font-size: 0.9rem;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--seb-red);
+    box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.25);
+}
+
+.warehouse-search-wrapper {
+    margin-bottom: 1rem;
+}
+
+.items-search-wrapper {
+    margin: 0.5rem 0 0.75rem 0;
+}
+
+.search-input::placeholder {
+    color: #9ca3af;
+}
