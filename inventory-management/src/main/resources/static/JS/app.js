@@ -1,9 +1,13 @@
 const API_BASE_URL = "http://localhost:8080";
 
+/** Warehouse cards container */
 const warehouseCardsContainer = document.getElementById("warehouse-cards");
+/** Search input for warehouses */
 const warehouseSearchInput = document.getElementById("warehouse-search");
+/** Add Warehouse button */
 const addWarehouseBtn = document.getElementById("add-warehouse-btn");
 
+/** Warehouse modal container */
 const warehouseModal = document.getElementById("warehouse-modal");
 const warehouseModalTitle = document.getElementById("warehouse-modal-title");
 const warehouseForm = document.getElementById("warehouse-form");
@@ -13,6 +17,7 @@ const warehouseLocationInput = document.getElementById("warehouse-location");
 const warehouseMaxCapacityInput = document.getElementById("warehouse-max-capacity");
 const warehouseCancelBtn = document.getElementById("warehouse-cancel-btn");
 
+/** Items (inventory list) modal container */
 const itemsModal = document.getElementById("items-modal");
 const itemsModalTitle = document.getElementById("items-modal-title");
 const itemsListContainer = document.getElementById("items-list");
@@ -20,6 +25,7 @@ const itemSearchInput = document.getElementById("item-search");
 const itemsAddBtn = document.getElementById("items-add-btn");
 const itemsCloseBtn = document.getElementById("items-close-btn");
 
+/** Item form modal (add/edit inventory row) */
 const itemFormModal = document.getElementById("item-form-modal");
 const itemFormModalTitle = document.getElementById("item-form-modal-title");
 const itemForm = document.getElementById("item-form");
@@ -32,6 +38,7 @@ const itemQuantityInput = document.getElementById("item-quantity");
 const itemStorageLocationInput = document.getElementById("item-storage-location");
 const itemCancelBtn = document.getElementById("item-cancel-btn");
 
+/** Transfer modal (move quantity of an inventory row to another warehouse) */
 const transferModal = document.getElementById("transfer-modal");
 const transferForm = document.getElementById("transfer-form");
 const transferInventoryIdInput = document.getElementById("transfer-inventory-id");
@@ -41,6 +48,7 @@ const transferQuantityInput = document.getElementById("transfer-quantity");
 const transferCancelBtn = document.getElementById("transfer-cancel-btn");
 
 const overlay = document.getElementById("overlay");
+
 
 let allWarehouses = [];
 let currentWarehouseForItems = null;
@@ -64,6 +72,13 @@ overlay?.addEventListener("click", () => {
   closeModal(transferModal);
 });
 
+/**
+ * API Helper for calling backend endpoints  *
+ * @param {string} path - URL path starting with "/"
+ * @param {RequestInit} [options={}] - fetch options
+ * @returns {Promise<any>} Parsed JSON object, raw text, or null
+ * @throws {Error} When response status is not OK
+ */
 async function api(path, options = {}) {
   const res = await fetch(API_BASE_URL + path, {
     ...options,
@@ -88,19 +103,29 @@ async function api(path, options = {}) {
   }
 }
 
+/**
+ * Loads enum department values from the backend
+ * Endpoint: GET /products/departments
+ * @returns {Promise<void>}
+ */
 async function loadDepartments() {
   try {
-    departments = await api("/products/departments"); 
+    departments = await api("/products/departments");
   } catch (e) {
     departments = [];
   }
 }
 
+/**
+ * Populates the item category input if possible
+ * - If the category input is a <select>, it fills <option> values.
+ * - If it's an <input>, it attaches a <datalist>.
+ * @returns {void}
+ */
 function fillDepartmentSelectIfPossible() {
   if (!itemCategoryInput) return;
 
   const tag = itemCategoryInput.tagName.toLowerCase();
-
   if (!departments.length) return;
 
   if (tag === "select") {
@@ -128,11 +153,23 @@ function fillDepartmentSelectIfPossible() {
   }
 }
 
+/**
+ * Loads warehouses from backend and renders them as cards
+ * Endpoint: GET /warehouses
+ * @returns {Promise<void>}
+ */
 async function loadWarehouses() {
   allWarehouses = await api("/warehouses");
   renderWarehouses(allWarehouses);
 }
 
+/**
+ * Renders the warehouse card UI for a given list of warehouses
+ * Fetches per-warehouse metrics (current load and remaining capacity)
+ *
+ * @param {Array<{id:number,name:string,location:string,max_capacity:number}>} list
+ * @returns {Promise<void>}
+ */
 async function renderWarehouses(list) {
   warehouseCardsContainer.innerHTML = "";
 
@@ -197,6 +234,9 @@ async function renderWarehouses(list) {
   }
 }
 
+/**
+ * Filters warehouses as user types
+ */
 warehouseSearchInput?.addEventListener("input", () => {
   const q = (warehouseSearchInput.value || "").trim().toLowerCase();
   const filtered = allWarehouses.filter(w =>
@@ -206,6 +246,11 @@ warehouseSearchInput?.addEventListener("input", () => {
   renderWarehouses(filtered);
 });
 
+/**
+ * Opens the warehouse modal (add or edit)
+ * @param {{id:number,name:string,location:string,max_capacity:number} | null} [w=null]
+ * @returns {void}
+ */
 function openWarehouseModal(w = null) {
   warehouseModalTitle.textContent = w ? "Edit Warehouse" : "Add Warehouse";
   warehouseIdInput.value = w?.id || "";
@@ -219,6 +264,11 @@ addWarehouseBtn?.addEventListener("click", () => openWarehouseModal());
 
 warehouseCancelBtn?.addEventListener("click", () => closeModal(warehouseModal));
 
+/**
+ * Submits warehouse create/update
+ * - If warehouseIdInput has a value, performs PUT /warehouses/{id}
+ * - Else performs POST /warehouses
+ */
 warehouseForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -256,6 +306,11 @@ itemsCloseBtn?.addEventListener("click", () => closeModal(itemsModal));
 
 itemsAddBtn?.addEventListener("click", () => openItemFormModal(null));
 
+/**
+ * Opens the items modal for a warehouse and loads its inventory list
+ * @param {{id:number,name:string}} warehouse
+ * @returns {Promise<void>}
+ */
 async function openItemsModal(warehouse) {
   currentWarehouseForItems = warehouse;
   itemsModalTitle.textContent = `Items in ${warehouse.name}`;
@@ -264,11 +319,20 @@ async function openItemsModal(warehouse) {
   openModal(itemsModal);
 }
 
+/**
+ * Loads inventory rows for a warehouse and renders them
+ * Endpoint: GET /inventory/warehouse/{warehouseId}
+ * @param {number} warehouseId
+ * @returns {Promise<void>}
+ */
 async function loadItemsForWarehouse(warehouseId) {
   lastLoadedItems = await api(`/inventory/warehouse/${warehouseId}`);
   renderItems(lastLoadedItems);
 }
 
+/**
+ * Filters items as the user types
+ */
 itemSearchInput?.addEventListener("input", () => {
   const q = (itemSearchInput.value || "").trim().toLowerCase();
   const filtered = lastLoadedItems.filter(inv => {
@@ -280,6 +344,11 @@ itemSearchInput?.addEventListener("input", () => {
   renderItems(filtered);
 });
 
+/**
+ * Renders the inventory rows into the items modal
+ * @param {Array<any>} items 
+ * @returns {void}
+ */
 function renderItems(items) {
   itemsListContainer.innerHTML = "";
 
@@ -326,6 +395,14 @@ itemCancelBtn?.addEventListener("click", () => {
   if (currentWarehouseForItems) openModal(itemsModal);
 });
 
+/**
+ * Opens item form modal
+ * - If inv is provided: edit mode (PUT /inventory/{id}) only updates quantity + storageLocation
+ * - If inv is null: add mode (POST /inventory/warehouse/{id}) creates new inventory row
+ *
+ * @param {any | null} inv
+ * @returns {void}
+ */
 function openItemFormModal(inv) {
   if (!currentWarehouseForItems) {
     alert("Open a warehouse first.");
@@ -344,6 +421,7 @@ function openItemFormModal(inv) {
   itemQuantityInput.value = (inv?.quantity ?? "");
   itemStorageLocationInput.value = inv?.storageLocation || "";
 
+  // Edit: no changes to name/sku/category allowed
   itemNameInput.disabled = isEdit;
   itemSkuInput.disabled = isEdit;
   itemCategoryInput.disabled = isEdit;
@@ -352,6 +430,11 @@ function openItemFormModal(inv) {
   openModal(itemFormModal);
 }
 
+/**
+ * Handles add/edit item form submission
+ * - Edit: PUT /inventory/{inventoryId}
+ * - Add:  POST /inventory/warehouse/{warehouseId}
+ */
 itemForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -375,12 +458,11 @@ itemForm?.addEventListener("submit", async (e) => {
         body: JSON.stringify(payload)
       });
     } else {
-      // CREATE
       const payload = {
         sku: itemSkuInput.value.trim(),
         name: itemNameInput.value.trim(),
         description: "",
-        category: (itemCategoryInput.value || "").trim(), // must match enum e.g. DAIRY
+        category: (itemCategoryInput.value || "").trim(), 
         quantity: Number(itemQuantityInput.value),
         storageLocation: itemStorageLocationInput.value.trim()
       };
@@ -390,6 +472,7 @@ itemForm?.addEventListener("submit", async (e) => {
         return;
       }
 
+      // block add if warehouse capacity is insufficient
       const remaining = await api(`/warehouses/${warehouseId}/capacity`);
       if (payload.quantity > remaining) {
         alert(`Not enough capacity. Remaining: ${remaining}`);
@@ -413,6 +496,13 @@ itemForm?.addEventListener("submit", async (e) => {
 
 transferCancelBtn?.addEventListener("click", () => closeModal(transferModal));
 
+/**
+ * Opens transfer modal for a specific inventory row
+ * It fills destination options using allWarehouses except the current one
+ *
+ * @param {any} inv 
+ * @returns {void}
+ */
 function openTransferModal(inv) {
   if (!currentWarehouseForItems) return;
 
@@ -438,6 +528,10 @@ function openTransferModal(inv) {
   openModal(transferModal);
 }
 
+/**
+ * Submits transfer form
+ * POST /inventory/{inventoryId}/transfer?fromWarehouse=..&toWarehouse=..&quantity=..
+ */
 transferForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 

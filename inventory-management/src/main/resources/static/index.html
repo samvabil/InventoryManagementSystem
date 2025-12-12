@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>S E B Inventory Management</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="CSS/styles.css">
   <link rel="icon" type="image/png" href="IMG/s-favicon.png">
 </head>
 <body>
@@ -22,7 +22,7 @@
       <h2>Warehouses</h2>
 
       <!-- Warehouse Search -->
-      <div class="warehouse-search-wrapper">
+      <div class="warehouse-search-wrapper"> 
         <input id="warehouse-search" class="search-input" type="text" placeholder="Search warehouses by name or location">
       </div>
 
@@ -67,7 +67,7 @@
 
       <!-- Item Search -->
       <div class="items-search-wrapper">
-        <input id="item-search" class="search-input" type="text" placeholder="Search items by name, SKU, or department">
+        <input id="item-search" class="search-input" type="text" placeholder="Search items by name or SKU">
       </div>
 
       <div id="items-list"></div>
@@ -125,7 +125,7 @@
 
         <label>
           Storage Location
-          <input type="text" id="item-storage-location" required placeholder="Example: Aisle 3, Shelf B">
+          <input type="text" id="item-storage-location" required placeholder="Example: Aisle 1 Shelf A">
         </label>
 
         <div class="modal-actions">
@@ -165,6 +165,6 @@
 
   <div id="overlay" class="overlay hidden"></div>
 
-  <script src="js/app.js"></script>
+  <script src="JS/app.js"></script>
 </body>
 </html>
