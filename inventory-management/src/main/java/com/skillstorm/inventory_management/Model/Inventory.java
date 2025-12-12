@@ -1,3 +1,9 @@
+/**
+ * Junction entity that links a Product to a Warehouse.
+ * Tracks how much of that product is stored in the warehouse
+ * and where inside the warehouse it is located.
+ * Mapped to the INVENTORY table in the database.
+ */
 package com.skillstorm.inventory_management.Model;
 
 import jakarta.persistence.Column;
@@ -8,49 +14,52 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "ITEMS")
-public class Item {
+@Table(
+    name = "INVENTORY",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "warehouse_id", "product_id" })
+    }
+)
+public class Inventory {
+
     @Id
-    @Column
+    @Column(name = "inventory_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "item_name")
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
 
-    @Column 
-    private String sku;
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @Column
+    @Column(nullable = false)
     private int quantity;
 
     @Column(name = "storage_location")
     private String storageLocation;
 
-    @ManyToOne
-    @JoinColumn(name = "warehouse_id")
-    private Warehouse warehouse;
-
-    public Item() {
+    public Inventory() {
     }
 
-    public Item(String name, String sku, int quantity, String storageLocation, Warehouse warehouse) {
-        this.name = name;
-        this.sku = sku;
+    public Inventory(Warehouse warehouse, Product product, int quantity, String storageLocation) {
+        this.warehouse = warehouse;
+        this.product = product;
         this.quantity = quantity;
         this.storageLocation = storageLocation;
-        this.warehouse = warehouse;
     }
 
-    public Item(int id, String name, String sku, int quantity, String storageLocation, Warehouse warehouse) {
+    public Inventory(int id, Warehouse warehouse, Product product, int quantity, String storageLocation) {
         this.id = id;
-        this.name = name;
-        this.sku = sku;
+        this.warehouse = warehouse;
+        this.product = product;
         this.quantity = quantity;
         this.storageLocation = storageLocation;
-        this.warehouse = warehouse;
     }
 
     public int getId() {
@@ -61,20 +70,20 @@ public class Item {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Warehouse getWarehouse() {
+        return warehouse;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setWarehouse(Warehouse warehouse) {
+        this.warehouse = warehouse;
     }
 
-    public String getSku() {
-        return sku;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setSku(String sku) {
-        this.sku = sku;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public int getQuantity() {
@@ -93,24 +102,15 @@ public class Item {
         this.storageLocation = storageLocation;
     }
 
-    public Warehouse getWarehouse() {
-        return warehouse;
-    }
-
-    public void setWarehouse(Warehouse warehouse) {
-        this.warehouse = warehouse;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + id;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((sku == null) ? 0 : sku.hashCode());
+        result = prime * result + ((warehouse == null) ? 0 : warehouse.hashCode());
+        result = prime * result + ((product == null) ? 0 : product.hashCode());
         result = prime * result + quantity;
         result = prime * result + ((storageLocation == null) ? 0 : storageLocation.hashCode());
-        result = prime * result + ((warehouse == null) ? 0 : warehouse.hashCode());
         return result;
     }
 
@@ -122,18 +122,18 @@ public class Item {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Item other = (Item) obj;
+        Inventory other = (Inventory) obj;
         if (id != other.id)
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (warehouse == null) {
+            if (other.warehouse != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!warehouse.equals(other.warehouse))
             return false;
-        if (sku == null) {
-            if (other.sku != null)
+        if (product == null) {
+            if (other.product != null)
                 return false;
-        } else if (!sku.equals(other.sku))
+        } else if (!product.equals(other.product))
             return false;
         if (quantity != other.quantity)
             return false;
@@ -142,17 +142,13 @@ public class Item {
                 return false;
         } else if (!storageLocation.equals(other.storageLocation))
             return false;
-        if (warehouse == null) {
-            if (other.warehouse != null)
-                return false;
-        } else if (!warehouse.equals(other.warehouse))
-            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "Item [id=" + id + ", name=" + name + ", sku=" + sku + ", quantity=" + quantity + ", storageLocation="
-                + storageLocation + ", warehouse=" + warehouse + "]";
+        return "Inventory [id=" + id + ", warehouse=" + warehouse + ", product=" + product + ", quantity=" + quantity
+                + ", storageLocation=" + storageLocation + "]";
     }
+    
 }

@@ -1,3 +1,8 @@
+/**
+ * Represents a warehouse facility that stores inventory items.
+ * Includes name, location, maximum storage capacity.
+ * Mapped to the WAREHOUSES table in the database.
+ */
 package com.skillstorm.inventory_management.Model;
 
 import java.util.Set;
@@ -15,7 +20,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "WAREHOUSES")
 public class Warehouse {
-    
+
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,28 +33,32 @@ public class Warehouse {
     private String location;
 
     @Column(name = "max_capacity")
-    private int max_capacity; 
+    private int max_capacity;
 
+    /**
+     * All inventory rows for this warehouse.
+     * One warehouse can have many inventory entries.
+     */
     @JsonIgnore
-    @OneToMany(targetEntity = Item.class, mappedBy = "warehouse")
-    private Set<Item> items;
+    @OneToMany(mappedBy = "warehouse")
+    private Set<Inventory> inventoryEntries;
 
     public Warehouse() {
     }
 
-    public Warehouse(String name, String location, int max_capacity, Set<Item> items) {
+    public Warehouse(String name, String location, int max_capacity, Set<Inventory> inventoryEntries) {
         this.name = name;
         this.location = location;
         this.max_capacity = max_capacity;
-        this.items = items;
+        this.inventoryEntries = inventoryEntries;
     }
 
-    public Warehouse(int id, String name, String location, int max_capacity, Set<Item> items) {
+    public Warehouse(int id, String name, String location, int max_capacity, Set<Inventory> inventoryEntries) {
         this.id = id;
         this.name = name;
         this.location = location;
         this.max_capacity = max_capacity;
-        this.items = items;
+        this.inventoryEntries = inventoryEntries;
     }
 
     public int getId() {
@@ -84,12 +93,12 @@ public class Warehouse {
         this.max_capacity = max_capacity;
     }
 
-    public Set<Item> getItems() {
-        return items;
+    public Set<Inventory> getInventoryEntries() {
+        return inventoryEntries;
     }
 
-    public void setItems(Set<Item> items) {
-        this.items = items;
+    public void setInventoryEntries(Set<Inventory> inventoryEntries) {
+        this.inventoryEntries = inventoryEntries;
     }
 
     @Override
@@ -100,7 +109,7 @@ public class Warehouse {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((location == null) ? 0 : location.hashCode());
         result = prime * result + max_capacity;
-        result = prime * result + ((items == null) ? 0 : items.hashCode());
+        result = prime * result + ((inventoryEntries == null) ? 0 : inventoryEntries.hashCode());
         return result;
     }
 
@@ -127,10 +136,10 @@ public class Warehouse {
             return false;
         if (max_capacity != other.max_capacity)
             return false;
-        if (items == null) {
-            if (other.items != null)
+        if (inventoryEntries == null) {
+            if (other.inventoryEntries != null)
                 return false;
-        } else if (!items.equals(other.items))
+        } else if (!inventoryEntries.equals(other.inventoryEntries))
             return false;
         return true;
     }
@@ -138,7 +147,7 @@ public class Warehouse {
     @Override
     public String toString() {
         return "Warehouse [id=" + id + ", name=" + name + ", location=" + location + ", max_capacity=" + max_capacity
-                + ", items=" + items + "]";
+                + ", inventoryEntries=" + inventoryEntries + "]";
     }
 
 }

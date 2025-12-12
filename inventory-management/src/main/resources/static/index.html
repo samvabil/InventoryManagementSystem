@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>S E B Inventory Management</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" type="image/png" href="IMG/s-favicon.png">
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand">
+      <img src="IMG/seb-logo.png" alt="S E B logo" class="brand-logo">
+      <h1>Inventory Management</h1>
+    </div>
+    <button id="add-warehouse-btn" class="btn primary">Add Warehouse</button>
+  </header>
+
+  <main class="layout">
+    <section class="warehouses-section">
+      <h2>Warehouses</h2>
+
+      <!-- Warehouse Search -->
+      <div class="warehouse-search-wrapper">
+        <input id="warehouse-search" class="search-input" type="text" placeholder="Search warehouses by name or location">
+      </div>
+
+      <div id="warehouse-cards" class="warehouse-grid"></div>
+    </section>
+  </main>
+
+  <!-- Warehouse Modal -->
+  <div id="warehouse-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="warehouse-modal-title">Add Warehouse</h3>
+      <form id="warehouse-form">
+        <input type="hidden" id="warehouse-id">
+
+        <label>
+          Name
+          <input type="text" id="warehouse-name" required>
+        </label>
+
+        <label>
+          Location
+          <input type="text" id="warehouse-location" required>
+        </label>
+
+        <label>
+          Max Capacity
+          <input type="number" id="warehouse-max-capacity" min="0" required>
+        </label>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Save</button>
+          <button type="button" id="warehouse-cancel-btn" class="btn secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Items Modal -->
+  <div id="items-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="items-modal-title">Items</h3>
+
+      <!-- Item Search -->
+      <div class="items-search-wrapper">
+        <input id="item-search" class="search-input" type="text" placeholder="Search items by name, SKU, or department">
+      </div>
+
+      <div id="items-list"></div>
+
+      <div class="modal-actions">
+        <button type="button" id="items-add-btn" class="btn primary">Add Item</button>
+        <button type="button" id="items-close-btn" class="btn secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item Form Modal -->
+  <div id="item-form-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="item-form-modal-title">Add Item</h3>
+      <form id="item-form">
+        <input type="hidden" id="item-id">
+        <input type="hidden" id="item-warehouse-id">
+
+        <label>
+          Name
+          <input type="text" id="item-name" required>
+        </label>
+
+        <label>
+          SKU
+          <input type="text" id="item-sku" required>
+        </label>
+
+        <label>
+          Department
+          <select id="item-category" required>
+            <option value="">Select department</option>
+            <option value="PRODUCE">Produce</option>
+            <option value="MEAT">Meat</option>
+            <option value="SEAFOOD">Seafood</option>
+            <option value="BAKERY">Bakery</option>
+            <option value="DELI">Deli</option>
+            <option value="GROCERY">Grocery</option>
+            <option value="FROZEN">Frozen</option>
+            <option value="DAIRY">Dairy</option>
+            <option value="PHARMACY">Pharmacy</option>
+            <option value="HOUSEHOLD">Household</option>
+            <option value="BEAUTY">Beauty</option>
+            <option value="PET">Pet</option>
+            <option value="BABY">Baby</option>
+            <option value="FLORAL">Floral</option>
+          </select>
+        </label>
+
+        <label>
+          Quantity
+          <input type="number" id="item-quantity" min="0" required>
+        </label>
+
+        <label>
+          Storage Location
+          <input type="text" id="item-storage-location" required placeholder="Example: Aisle 3, Shelf B">
+        </label>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Save Item</button>
+          <button type="button" id="item-cancel-btn" class="btn secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transfer Modal -->
+  <div id="transfer-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Transfer Item</h3>
+
+      <form id="transfer-form">
+        <input type="hidden" id="transfer-inventory-id">
+        <input type="hidden" id="transfer-from-warehouse-id">
+
+        <label>
+          Destination Warehouse
+          <select id="transfer-to-warehouse" required></select>
+        </label>
+
+        <label>
+          Quantity to transfer
+          <input type="number" id="transfer-quantity" min="1" required>
+        </label>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Transfer</button>
+          <button type="button" id="transfer-cancel-btn" class="btn secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay hidden"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
