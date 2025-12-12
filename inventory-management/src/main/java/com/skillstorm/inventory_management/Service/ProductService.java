@@ -1,5 +1,6 @@
 package com.skillstorm.inventory_management.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -56,6 +57,14 @@ public class ProductService {
     }
 
     /**
+     * Retrieves all products 
+     * @return list of products 
+     */
+    public List<Product> findAllProducts() {
+    return productRepository.findAll();
+    }
+
+    /**
      * Finds a product by primary key
      * @param id product id
      * @return product if found, null if doesn't exist 
@@ -75,4 +84,5 @@ public class ProductService {
         }
         return productRepository.findBySkuIgnoreCase(sku.trim()).orElse(null);
     }
+
 }

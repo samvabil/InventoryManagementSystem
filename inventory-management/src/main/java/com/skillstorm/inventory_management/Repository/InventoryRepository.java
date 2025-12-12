@@ -27,9 +27,4 @@ public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
             Warehouse warehouse,
             String skuFragment
     );
-
-    List<Inventory> findByWarehouseAndProduct_CategoryContainingIgnoreCase(
-            Warehouse warehouse,
-            String categoryFragment
-    );
 }
